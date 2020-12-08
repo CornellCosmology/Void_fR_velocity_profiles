@@ -1,0 +1,42 @@
+these voids are saved as numpy object array files. use np.load("path_to_file", allow_pickle=True) to load them. sometimes, encoding="latin1" must also be passed depending on the version of python.
+Example:
+
+np.load(GR_partVoidPath_z0p5,allow_pickle=True,encoding="latin1")
+
+where here I have saved GR_partVoidPath_z0p5 as a string variable 
+
+file naming convention:
+GR,F6,F5 - self explanitory
+GRZ, F6Z, F5Z - implements redshift space distortions (shifts Z with vel_z)
+haloVoids - voids whose density and Velocty profile information was constructed from the halo data 
+partVoids - "									       " particle data
+z0p0 - at redshift 0 (now)
+z0p5 - at redshift 0.5
+shiftedX - old (with bug) way of generating data. always occurs at z0p0, these dont exist for z0p5
+F(6 or 5)_centersGR_z0p0 - these catalogs are particle data voids where we feed into each respective F(R) theory the void centers as identified from the GR halo catalog so that we can examine how the exact same regions evolved in GR versus F(R) gravity.
+
+
+voids without any shift are lack both a "Z" and the shiftedX labels
+
+void centers are always identified with halos using whichever method the name refers to 
+particle data is always unshifted in any way. the centers we feed into it to are the only things which change
+
+voids have the following attributes. 
+if cat=np.load(GR_partVoidPath_z0p5,allow_pickle=True,encoding="latin1") and cat[i]=void, then
+ 
+void[0][0]=realization number
+void[0][1]= void ID number (largely useless)
+void[1]="R" or "S". this field gets changed when the reclassifyVoid() method gets ran. since these are object arrays, no issue with classifying with a number instead
+void[2]= R_{eff}
+void[3][0] = density profile, bin centers
+void[3][1] = density profile, values
+
+void[4][0] = radial velocity profile, bin centers
+void[4][1] = radial velocity profile, values
+
+
+if the void is a "haloVoid" then it will also have 
+void[0][2] = np.array([realization's mean number density]) literally an array of just one number cause i didnt catch this before i saved evreything 
+void[0][3] = void macrocenter - array of 3 numbers , x,y,z positions.
+
+
