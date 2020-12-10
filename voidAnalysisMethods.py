@@ -7,31 +7,29 @@ Created on Tue Dec  8 09:13:00 2020
 """
 import numpy as np
 
-import copy
-import os
-import numpy as np
+
+#import os
+#import numpy as np
 import matplotlib.pyplot as plt
 import scipy as sp
 import scipy.linalg
-from scipy import integrate
-from scipy import special 
-from scipy import misc
-from scipy import special 
-from mpmath import *
-from scipy import interpolate
-from numpy import polynomial 
+#from scipy import integrate
+#from scipy import special 
+#from scipy import misc
+#from scipy import special 
+#from mpmath import *
+#from scipy import interpolate
+#from numpy import polynomial 
+
+
 
 
 "Methods involving basic void catalog analysis"
 
-def buildDensityProfile(cat,voidType=False,rMin=5,rMax=15,deltaMin=-1,deltaMax=1000,weight=0,outTo=50):
+def buildDensityProfile(cat,voidType=["R"],rMin=5,rMax=15,weight=0,outTo=50):
     densVals=[[] for i in range(outTo)]
     xpoints=cat[0][3][0][0:outTo]
-
-    if isinstance(voidType, list):
-        voidsToUse=[v for v in cat if (v[2] > rMin and v[2] < rMax and (v[1] in voidType or voidType == "all"))]
-    else:
-        voidsToUse=[v for v in cat if (v[2] > rMin and v[2] < rMax and (v[1] >=deltaMin and v[1] <= deltaMax))]
+    voidsToUse=[v for v in cat if (v[2] > rMin and v[2] < rMax and (v[1] in voidType or voidType == "all"))]
 
     for void in voidsToUse:
         for i in range(outTo):
@@ -76,26 +74,26 @@ def buildIntegratedDensityProfile(cat,voidType=["R"],rMin=5,rMax=15,catType='hal
 
 
 
-def buildVelocityProfile(cat,voidType=["R"],rMin=10,rMax=20,weight=0,catType='part',corFactor=1,minFromCenter=0,outTo=30):
+def buildVelocityProfile(cat,voidType=["R"],rMin=10,rMax=20,weight=0,catType='part',corFactor=1,minFromCenter=0):
     
-    velocityVals=[[] for i in range(outTo)]
+    velocityVals=[[] for i in range(30)]
     xpoints=cat[0][4][0]
     voidsToUse=[v for v in cat if (v[2] > rMin and v[2] < rMax and (v[1] in voidType or voidType == "all"))]
    
     for void in voidsToUse:
-        for i in range(outTo):
+        for i in range(30):
             if (void[4][1][i]!=0 and void[3][0][i]*void[2] >= minFromCenter):
                 velocityVals[i]=np.append(velocityVals[i],void[4][1][i]*(void[2]**weight))
 
-    dataToSave=np.array([xpoints,[np.average(velocityVals[i])*corFactor for i in range(outTo)],[np.std(velocityVals[i])/np.sqrt(len(velocityVals[i]))*corFactor for i in range(outTo)]])
+    dataToSave=np.array([xpoints,[np.average(velocityVals[i])*corFactor for i in range(30)],[np.std(velocityVals[i])/np.sqrt(len(velocityVals[i]))*corFactor for i in range(30)]])
     
     return dataToSave
 
 
 
-def buildIntegratedVelocityProfile(cat,voidType=["R"],rMin=5,rMax=15,catType='part',weight=0,corFactor=1,startIndex=0,minFromCenter=0,outTo=30):
+def buildIntegratedVelocityProfile(cat,voidType=["R"],rMin=5,rMax=15,catType='part',weight=0,corFactor=1,minFromCenter=0):
 
-    velocityVals=[[] for i in range(outTo)]
+    velocityVals=[[] for i in range(30)]
     if (catType=="part"):
         nBar=0.05 
 
@@ -107,7 +105,7 @@ def buildIntegratedVelocityProfile(cat,voidType=["R"],rMin=5,rMax=15,catType='pa
             nBar=void[0][2][0]
         numPartTot=0
         vel=0
-        for i in range(outTo):
+        for i in range(30):
             if void[3][0][i]*void[2] >= minFromCenter:
                 
                 delta=void[3][1][i]
@@ -124,7 +122,7 @@ def buildIntegratedVelocityProfile(cat,voidType=["R"],rMin=5,rMax=15,catType='pa
                 if (numPartTot!=0):
                     velocityVals[i]=np.append(velocityVals[i],vel/numPartTot*(void[2]**weight))
 
-    dataToSave=np.array([xpoints,[np.average(velocityVals[i])*corFactor for i in range(outTo)],[np.std(velocityVals[i])/np.sqrt(len(velocityVals[i]))*corFactor for i in range(outTo)]])
+    dataToSave=np.array([xpoints,[np.average(velocityVals[i])*corFactor for i in range(30)],[np.std(velocityVals[i])/np.sqrt(len(velocityVals[i]))*corFactor for i in range(30)]])
     return dataToSave
 
 
@@ -203,13 +201,13 @@ def GminusNewton(r,R=1.2,R_eff=15,a=1,rho=77985400000.0,G=4.301*10**-9):
 
 "Should explain these methods"
 def FplusNewtonR1(r,R=1.2,a=1,rho=77985400000.0,G=4.301*10**-9):
-    return -4*a*G*pi*rho*R**2/(r**2)
+    return -4*a*G*np.pi*rho*R**2/(r**2)
 
 def GplusNewtonR2(r,R=1.2,a=1,rho=77985400000.0,G=4.301*10**-9):
-    return -(4*G*pi*rho*(R*a)**2)/r
+    return -(4*G*np.pi*rho*(R*a)**2)/r
 
 def GminusNewtonR2(r,R=1.2,a=1,rho=77985400000.0,G=4.301*10**-9):
-    return -4*((a)**2)*G*pi*R*rho
+    return -4*((a)**2)*G*np.pi*R*rho
 
 
 "Below methods calculates the linear fifth force and the newtonian force using greens functions"
@@ -278,7 +276,7 @@ def calcGreensFifthField(densProf,R_eff,F0=1e-6,z=0,Limit=10000,dx=0.00001,outTo
 
 
 
-def calcGreensNewtonForce(densProf,R_eff,F0=1e-6,z=0,Limit=10000,dx=0.00001,outTo=5,omega_M=0.281,omega_L=0.719):
+def calcGreensNewtonForce(densProf,R_eff,z=0,Limit=10000,dx=0.00001,outTo=5,omega_M=0.281,omega_L=0.719):
     a=1/(1+z)
     G=4.301*10**-9 
     "G=newtons constant with units of (km/s)^2 (Mpc/MSun)"
@@ -303,7 +301,7 @@ def calcGreensNewtonForce(densProf,R_eff,F0=1e-6,z=0,Limit=10000,dx=0.00001,outT
     return [xpoints,forcePoints/convFac]
 
 
-def calcGreensNewtonField(densProf,R_eff,F0=1e-6,z=0,Limit=10000,dx=0.00001,outTo=5,omega_M=0.281,omega_L=0.719):
+def calcGreensNewtonField(densProf,R_eff,z=0,Limit=10000,dx=0.00001,outTo=5,omega_M=0.281,omega_L=0.719):
     a=1/(1+z)
     G=4.301*10**-9 
     "G=newtons constant with units of (km/s)^2 (Mpc/MSun)"
@@ -327,7 +325,7 @@ def calcGreensNewtonField(densProf,R_eff,F0=1e-6,z=0,Limit=10000,dx=0.00001,outT
     return [xpoints,fieldPoints]
 
 
-def calcGreensNewtonForceR1(densProf,F0=1e-6,z=0,Limit=10000,dx=0.00001,outTo=5,omega_M=0.281,omega_L=0.719):
+def calcGreensNewtonForceR1(densProf,z=0,Limit=10000,dx=0.00001,outTo=5,omega_M=0.281,omega_L=0.719):
     "densProf must be weighted by R_eff^1"
     a=1/(1+z)
     G=4.301*10**-9 
@@ -428,8 +426,8 @@ def forceFromField(fieldPoints,R_eff,z=0,dx=0.00001):
     return forcePoints
     
 
-def fifthFieldCorrection(field,R_eff,z,Delta,F0=1e-6,Limit=10000,dx=0.00001,outTo=5,fracBeforeMod=0.8,omega_M=0.281,omega_L=0.719):
-    "Delta should be equal to the real density minus reconstructed density --> delta0-delta1, equal to epsilon from the paper"
+def fifthFieldCorrection(field,R_eff,z,epsilon,F0=1e-6,Limit=10000,dx=0.00001,outTo=5,fracBeforeMod=0.8,omega_M=0.281,omega_L=0.719):
+    "epsilon should be equal to the real density minus reconstructed density --> delta0-delta1, equal to epsilon from the paper"
     "delta1 is reconstructed from fullEqnCheckInterp above"
     "field should have units of (km/s)^2 here"
     
@@ -447,7 +445,7 @@ def fifthFieldCorrection(field,R_eff,z,Delta,F0=1e-6,Limit=10000,dx=0.00001,outT
     fieldInterp=sp.interpolate.CubicSpline(field[0],field[1],bc_type = 'not-a-knot')
     
 
-    DeltaInterp = sp.interpolate.CubicSpline(Delta[0],Delta[1],bc_type = 'not-a-knot')
+    epsilonInterp = sp.interpolate.CubicSpline(epsilon[0],epsilon[1],bc_type = 'not-a-knot')
     dimFac=((2.997e5)**2)
     "multiplying by dimfac changes a dimensionless field into one with units of (km/s)^2"
     fieldMax=dimFac*F0*modFac
@@ -472,8 +470,8 @@ def fifthFieldCorrection(field,R_eff,z,Delta,F0=1e-6,Limit=10000,dx=0.00001,outT
     fieldCorrectionPoints=np.zeros(len(xpoints))
     for i in range(1,len(xpoints)):
         r=xpoints[i]
-        In=sp.integrate.quad(lambda R: (DeltaInterp(R)+0)*Gplus(r,float(R),R_eff,a,MU(float(R)),rho),dx,r-dx,limit=Limit)[0]
-        Out=sp.integrate.quad(lambda R: (DeltaInterp(R)+0)*Gminus(r,float(R),R_eff,a,MU(float(R)),rho),r+dx,xpoints[-1],limit=Limit)[0]
+        In=sp.integrate.quad(lambda R: (epsilonInterp(R)+0)*Gplus(r,float(R),R_eff,a,MU(float(R)),rho),dx,r-dx,limit=Limit)[0]
+        Out=sp.integrate.quad(lambda R: (epsilonInterp(R)+0)*Gminus(r,float(R),R_eff,a,MU(float(R)),rho),r+dx,xpoints[-1],limit=Limit)[0]
 
         fieldCorrectionPoints[i]=In+Out
     print("field changed by a maximum of "+ str(np.max(np.abs(fieldCorrectionPoints))) + " (km/s)^2")    
@@ -532,42 +530,156 @@ def getInitialFieldGuess(densProf,z,F0=1e-6,outTo=5,omega_M=0.281,omega_L=0.719)
 
 
 
-"The below methodis used to calculate the newtonian force along with the standard error. the density profile must be weighted by the effective radius"
+"The below method is used to calculate the newtonian force along with the standard error. The density profile must be weighted by the effective radius"
 "still need to go through this "
-def calcGreensNewtonForceError(densProf,F0=1e-6,z=0,Limit=10000,dx=0.00001):
+
+def calcGreensNewtonForceWithError(densProf,z=0,Limit=10000,dx=0.00001,outTo=5,omega_M=0.281):
     "densProf must be weighted by R_eff^1, and include the standard error in the mean "
+    
+    G=4.301*10**-9 
+    "G=newtons constant with units of (km/s)^2 (Mpc/MSun)"
+    
     a=1/(1+z)
-    mu=(1/2997.92458*(1/(2*F0))**(1/2))*((omega_M*a**(-3)+4*omega_L)**(3/2))/(omega_M+4*omega_L)
+    
+    rho_bar0=3*(100)**2/(8*np.pi*G)*omega_M
+    rho=rho_bar0/(a**3)
 
     rho=rho_bar0/(a**3)
     xPoints=densProf[0]
     delta=densProf[1]
     
-    xpoints=np.arange(0,3,.02)
+    xpoints=np.arange(0,outTo,.02)
     deltaInterp = sp.interpolate.CubicSpline(xPoints,delta,bc_type = 'natural')
     forcePoints=np.zeros(len(xpoints))
     for i in range(1,len(xpoints)):
         r=xpoints[i]
-        In=sp.integrate.quad(lambda R: (deltaInterp(R)+0)*FplusNewtonR1(r,float(R),a,mu,rho),dx,r-dx,limit=Limit)[0]
+        In=sp.integrate.quad(lambda R: (deltaInterp(R)+0)*FplusNewtonR1(r,float(R),a,rho),dx,r-dx,limit=Limit)[0]
         forcePoints[i]=In
     
     
     delta=densProf[2]
-    #xpoints=np.linspace(0,R_eff_final,400)
-    xpoints=np.arange(0,3,.02)
+    xpoints=np.arange(0,outTo,.02)
     deltaInterp = sp.interpolate.CubicSpline(xPoints,delta,bc_type = 'natural')
     errorPoints=np.zeros(len(xpoints))
     for i in range(1,len(xpoints)):
         r=xpoints[i]
-        In=sp.integrate.quad(lambda R: (deltaInterp(R)+0)*FplusNewtonR1(r,float(R),a,mu,rho),dx,r-dx,limit=Limit)[0]
+        In=sp.integrate.quad(lambda R: (deltaInterp(R)+0)*FplusNewtonR1(r,float(R),a,rho),dx,r-dx,limit=Limit)[0]
         errorPoints[i]=-In
     
+    convFac=29979245.8 
+    "dividing by convFac changes units from h/Mpc (km/s)^2 to H0*c"
+    "Force is returned with units of H0*c"
     return [xpoints,forcePoints/convFac,errorPoints/convFac]
 
 
+def convergeForce(densProf,R_eff,z=0,dampFactor=0.75,maxLoops=10,binsToIgnore=10,tolerance=0.0075,outTo=5,F0=1e-6,fracBeforeMod=0.9,omega_M=0.281,omega_L=0.719):
+
+    dimFac=(2.997e5)**2
+    "multiply a dimensionless field by dimFac to give it units of (km/s)**2"
+    a=1/(1+z)
+    modFac=((1+4*omega_L/omega_M)/(a**(-3)+4*omega_L/omega_M))**2
+    "modFac turns the fields average value today into the fields average value at redshift z"
+    
+    fieldMax=dimFac*F0*modFac
+
+    "first we get the field from the greens function method, and see if the initial error is acceptable"
+    field=calcGreensFifthField(densProf,R_eff=R_eff,outTo=outTo,F0=F0,z=z,omega_M=omega_M,omega_L=omega_L)
+    force=forceFromField(field,R_eff,z=z)
+    aa=np.max(force[1])
+    field=fieldCheck(field, fieldMax)
+    field[1][0]=field[1][1]
+    force=forceFromField(field,R_eff,z=z)
+    
+    xpoints=field[0]
+
+    
+    deltaInterp = sp.interpolate.CubicSpline(densProf[0],densProf[1],bc_type = 'natural')
+    deltaI=np.array([[r for r in xpoints[1:]],[(max(deltaInterp(r)+0,-1)) for r in xpoints[1:]]])
+    deltaFull=fullEqnCheckInterp(force, field, R_eff,z=z,outTo=outTo,F0=F0,omega_M=omega_M,omega_L=omega_L)
+    error0=np.max(np.abs(deltaI[1][binsToIgnore:-binsToIgnore]-deltaFull[1][binsToIgnore:-binsToIgnore]))
+    if (error0>1):
+         print("initial error too high, checking second method")
+         field1=getInitialFieldGuess(densProf,z=z,outTo=outTo,F0=F0,omega_M=omega_M,omega_L=omega_L)
+         field1=fifthFieldCorrection(field1,R_eff=R_eff,z=z,epsilon=densProf,F0=F0,outTo=outTo,fracBeforeMod=fracBeforeMod,omega_M=omega_M,omega_L=omega_L)
+         field1=fieldCheck(field1, fieldMax,fracBeforeMod=fracBeforeMod)
+         field1[1][0]=field1[1][1] # sets the force at the origin to 0
+         force1=forceFromField(field1,R_eff,z=z)
+         deltaFull1=fullEqnCheckInterp(force1, field1, R_eff,z=z,outTo=outTo,F0=F0,omega_M=omega_M,omega_L=omega_L)
+         error1=np.max(np.abs(deltaI[1][binsToIgnore:-binsToIgnore]-deltaFull1[1][binsToIgnore:-binsToIgnore]))
+         if (error1>error0):
+             print("Reverting to first method")
+         if (error1<error0):
+             print("Changing to second method")
+             tolerance=np.max([np.max(np.abs(densProf[1]))/200,tolerance])
+             print("We are using tolerance = " + str(tolerance))
+             field=field1
+             force=force1
+             deltaFull=deltaFull1
+             error0=error1
+         
+            
+         
+    errorOld=error0
+    print("the current error is " + str(errorOld))
+    "below we begin the iterative procedure"
+    for i in range(maxLoops):
+        if (errorOld<0.3):
+            dampFactor=1
+        print("entering loop " + str(i))
+        epsilon=np.array([deltaFull[0],deltaI[1]-deltaFull[1]])
+        
+        fieldCor=fifthFieldCorrection(field,R_eff=R_eff,z=z,epsilon=epsilon,F0=F0,Limit=10000,dx=0.00001,outTo=outTo,fracBeforeMod=fracBeforeMod,omega_M=omega_M,omega_L=omega_L)
+        newField=np.array([field[0],field[1]+dampFactor*fieldCor[1]])
+
+        newField=fieldCheck(field=newField,fieldMax=fieldMax,fracBeforeMod=fracBeforeMod)
+        newField[1][0]=newField[1][1]
+
+        newForce=forceFromField(newField, R_eff=R_eff,z=z)
+        field=newField
+        force=newForce
+        
+        deltaFull=fullEqnCheckInterp(force, field, R_eff,z=z,outTo=outTo,F0=F0,omega_M=omega_M,omega_L=omega_L)
+      
+        errorNew=np.max(np.abs(deltaI[1][binsToIgnore:-binsToIgnore]-deltaFull[1][binsToIgnore:-binsToIgnore]))
+        print("the current error is " + str(errorNew))
+        
+        if (errorNew<tolerance):
+            break
+
+        errorOld=errorNew
+        
+    print("the final error is " + str(errorNew))
+    
+    A=np.max(force[1])
+    alpha=A/aa # this computes the fractional difference between the linear and fifth force at the peak value of both 
+    print("  ")
+    print("alpha = " + str(alpha))
+    return np.array([force[0],force[1],field[1]]), np.array([alpha,errorNew]),deltaFull
 
 
+def filterFifthForce(forceCat,voidCat,rMin,rMax,alphaCat="none",errorCut=0.05,voidType=["R"]):
+    xpoints=np.arange(0,5,.02)
+    if (alphaCat == "none"):
+        indicesToUse=[i for i in range(len(voidCat)) if (voidCat[i][2] > rMin and voidCat[i][2] < rMax and (voidCat[i][1] in voidType or voidType == "all"))]
+    else:
+        indicesToUse=[i for i in range(len(voidCat)) if (voidCat[i][2] > rMin and voidCat[i][2] < rMax and (voidCat[i][1] in voidType or voidType == "all") and alphaCat[i][1]<errorCut)]
+    forceArray=np.transpose(forceCat[indicesToUse])
+    "first entry of forceArray gives the bin to use, second entry picks force or field, third entry gives that quantity for an individual void"
+
+    averageForce=np.zeros(250)
+    standardErrorForce=np.zeros(250)
+    for i in range(len(averageForce)):
+        averageForce[i]=np.mean(forceArray[i][0])
+        standardErrorForce[i]=np.std(forceArray[i][0])/np.sqrt(len(forceArray[i][0]))
+    
+    "units of force are H0*c"
+    return xpoints,averageForce,standardErrorForce
 
 
+def getAlphas(alphaErrors,cat,rMin,rMax,voidType=["S"],exceptionsList=[]):
+    
+    indicesToUse=[i for i in range(len(cat)) if (cat[i][2] > rMin and cat[i][2] < rMax and (cat[i][1] in voidType or voidType == "all") and alphaErrors[i][1]<0.5 and (i not in exceptionsList))]
+    alphaList=np.transpose(alphaErrors[indicesToUse])[0]
+    return np.mean(alphaList),np.std(alphaList)/(np.sqrt(len(alphaList)))
 
 
