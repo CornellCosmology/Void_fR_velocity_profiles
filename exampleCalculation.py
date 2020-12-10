@@ -8,10 +8,9 @@ Created on Tue Dec  8 15:34:17 2020
 
 from voidAnalysisMethods import *
 
-
-"NEED TO CHANGE THIS"
 voidDir="path/to/directory/containing/voidCatalog/"
 voidDir="/Users/christopherwilson/Documents/GitHub/Void_fR_velocity_profiles/voidData/"
+
 
 
 "Load in voids here"
@@ -44,6 +43,7 @@ F5_haloVoidPath_z0p5=voidDir+"F5_haloVoids_z0p5.npy"
 F5_haloVoids_z0p5=np.load(F5_haloVoidPath_z0p5,allow_pickle=True,encoding="latin1")
 
 
+
 "commented out below is how to re-classify voids. you can change the Rcut values or the deltaCut values to adjust what is considered R type or S type."
 "If you want to re-classify voids based on the particle data, have to set 'fromParts=True'" 
 
@@ -61,7 +61,7 @@ F5_haloVoids_z0p5=np.load(F5_haloVoidPath_z0p5,allow_pickle=True,encoding="latin
 # matchClassificatons(F6_haloVoids_z0p0,F6_partVoids_z0p0)
 # matchClassificatons(F5_haloVoids_z0p0,F5_partVoids_z0p0)
 
-#########################################################################################################################
+########################################################################################################################
 
 "calculate density profile for GR, F5, and F6 from particles, for 'R' type voids at z=0, with R_eff between 5 and 15 Mpc/h"
 rMin=5
@@ -158,8 +158,14 @@ ReffAvgF6=getAvgReff(F6_partVoids_z0p0,voidType=["R"],rMin=5,rMax=15)
 linFifthF6=calcGreensFifthForce(densProfF6,ReffAvgF6,F0=1e-6,z=0,Limit=10000,dx=0.00001,outTo=5,omega_M=0.281,omega_L=0.719)
 plt.plot(linFifthF6[0],linFifthF6[1])
 
+
+
 fullFifthF6,alphas,newDens=convergeForce(densProfF6,ReffAvgF6,z=0,dampFactor=0.75,maxLoops=10,binsToIgnore=10,tolerance=0.0075,outTo=5,F0=1e-6,fracBeforeMod=0.9,omega_M=0.281,omega_L=0.719)
 plt.plot(fullFifthF6[0],fullFifthF6[1])
+
+"when running the various methods related to forces, 'outTo' now refers to how many Reff you want to calculate the force out to. the max value is 5"
+"outTo=5 will include the entirety of the density profile from 'partVoids' and is therefor recommended, although not necessary"
+
 
 plt.ylabel("H0*c")
 plt.xlabel("r/R_eff")
