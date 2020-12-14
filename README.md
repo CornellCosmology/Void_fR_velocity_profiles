@@ -1,7 +1,7 @@
 # Voids_fR_public
 This github hosts the void catalogs, and analysis codes used in the work by Chris Wilson and Rachel Bean at https://arxiv.org/abs/2012.05925.
 
-All analysis code was developed by Wilson and Bean. The void catalogs were created using the VIDE void finder on the ELEPHANT simulations, provided courtesy of Baojiu Li. If using these void catalogs and analysis tools, please cite the following papers, as well as our paper listen above.
+All analysis code was developed by Wilson and Bean. The void catalogs were created using the VIDE void finder on the ELEPHANT simulations, provided courtesy of Baojiu Li. If using these void catalogs and analysis tools, please cite the following papers, as well as our paper listed above.
 
 Sutter et al. https://arxiv.org/abs/1406.1191 (VIDE void finder)
 
